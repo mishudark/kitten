@@ -161,7 +161,7 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 		return errors.E(errors.Errorf("operation insert can not be performed, zero rows affected, resource %s", whereValue), errors.NotExist)
 	}
 
-	return p.col().Find(whereColumn, whereValue).One(structPtr)
+	return p.col().Find(whereColumn, whereValue).Limit(1).One(structPtr)
 }
 
 // List the elements starting from the given page token, in cae it is empty
@@ -232,7 +232,7 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 		return errors.E(errors.Errorf("operation update can not be performed, not exist, resource %s", whereValue), errors.NotExist)
 	}
 
-	return p.col().Find(whereColumn, whereValue).One(structPtr)
+	return p.col().Find(whereColumn, whereValue).Limit(1).One(structPtr)
 }
 
 func (p *PartialMutation) getColumnsValuesIncluding(structValue interface{}, fields []string) (columns []string, values []interface{}, err error) {
