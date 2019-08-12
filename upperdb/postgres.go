@@ -152,9 +152,13 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 	}
 
 	query := p.sess.InsertInto(p.table).Columns(columns...).Values(values...)
-	_, err = query.Exec()
+	res, err := query.Exec()
 	if err != nil {
 		return err
+	}
+
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.E(errors.Errorf("operation insert can not be performed, zero rows affected, resource %s", whereValue), errors.NotExist)
 	}
 
 	return p.col().Find(whereColumn, whereValue).One(structPtr)
