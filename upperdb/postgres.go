@@ -219,9 +219,13 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 	}
 
 	query := p.sess.Update(p.table).Set(mapValues).Where(whereColumn, whereValue)
-	_, err = query.Exec()
+	res, err := query.Exec()
 	if err != nil {
 		return err
+	}
+
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.E(errors.Errorf("operation update can not be performed, not exist, resource %s", whereValue), errors.NotExist)
 	}
 
 	return p.col().Find(whereColumn, whereValue).One(structPtr)
