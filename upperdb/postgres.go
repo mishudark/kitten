@@ -8,6 +8,7 @@ import (
 	"github.com/fatih/structs"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/mishudark/errors"
+	db "upper.io/db.v3"
 	"upper.io/db.v3/lib/sqlbuilder"
 )
 
@@ -171,7 +172,12 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 		limit = 30
 	}
 
-	query := p.col().Find(fmt.Sprintf("%s > ?", column), pageToken).OrderBy(column)
+	var query db.Result
+	if pageToken == "" {
+		query = p.col().Find().OrderBy(column)
+	} else {
+		query = p.col().Find(fmt.Sprintf("%s > ?", column), pageToken).OrderBy(column)
+	}
 
 	err = query.Limit(limit).All(container)
 	if err != nil {
