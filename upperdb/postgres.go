@@ -184,10 +184,12 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 		return "", err
 	}
 
-	row := make(map[string]string)
-	query.Offset(limit).One(&row) // nolint: errcheck
+	var row struct {
+		ID string `db:"id"`
+	}
 
-	return row[column], nil
+	query.Offset(limit).One(&row) // nolint: errcheck
+	return row.ID, nil
 }
 
 // Update the provided values with the included or exluded fields, include rules has preference over
