@@ -155,7 +155,9 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 		return err
 	}
 
-	mod(columns, values)
+	if mod != nil {
+		mod(columns, values)
+	}
 
 	query := p.sess.InsertInto(p.table).Columns(columns...).Values(values...)
 	res, err := query.Exec()
