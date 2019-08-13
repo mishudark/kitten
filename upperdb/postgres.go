@@ -129,9 +129,12 @@ func NewPartialMutation(opt Option, opts ...Option) (*PartialMutation, error) {
 	return operation, nil
 }
 
+// InsertModifier can be used to modify columns and values
+type InsertModifier func(columns []string, values []interface{})
+
 // Insert the provided values with the included or exluded fields, include rules has preference over
 // the excluded rules
-func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue string) error {
+func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue string, mod InsertModifier) error {
 	if structPtr == nil || reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
 		return fmt.Errorf("expecting a pointer but got %T", structPtr)
 	}
@@ -151,6 +154,8 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 	if err != nil {
 		return err
 	}
+
+	mod(columns, values)
 
 	query := p.sess.InsertInto(p.table).Columns(columns...).Values(values...)
 	res, err := query.Exec()
