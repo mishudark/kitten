@@ -188,7 +188,7 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 		ID string `db:"id"`
 	}
 
-	query.Offset(limit - 1).One(&row) // nolint: errcheck
+	query.Offset(limit - 1).Limit(1).One(&row) // nolint: errcheck
 	return row.ID, nil
 }
 
