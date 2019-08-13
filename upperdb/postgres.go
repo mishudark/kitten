@@ -176,7 +176,7 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 	if pageToken == "" {
 		query = p.col().Find().OrderBy(column)
 	} else {
-		query = p.col().Find(fmt.Sprintf("%s > ?", column), pageToken).OrderBy(column)
+		query = p.col().Find(fmt.Sprintf("%s >= ?", column), pageToken).OrderBy(column)
 	}
 
 	err = query.Limit(limit).All(container)
@@ -188,7 +188,7 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 		ID string `db:"id"`
 	}
 
-	query.Offset(limit - 1).Limit(1).One(&row) // nolint: errcheck
+	query.Offset(limit).Limit(1).One(&row) // nolint: errcheck
 	return row.ID, nil
 }
 
