@@ -174,19 +174,23 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 
 // List the elements starting from the given page token, in cae it is empty
 // the list will start from zero, using the column name over with it will be ordered
-func (p *PartialMutation) List(container interface{}, column, pageToken string, limit int) (nextPageToken string, err error) {
+func (p *PartialMutation) List(container interface{}, column, pageToken string, where map[string]string, limit int) (nextPageToken string, err error) {
 	if limit == 0 || limit < 0 {
 		limit = 30
 	}
 
 	var query db.Result
 	if pageToken == "" {
-		query = p.col().Find().OrderBy(column)
+		query = p.col().Find()
 	} else {
-		query = p.col().Find(fmt.Sprintf("%s >= ?", column), pageToken).OrderBy(column)
+		query = p.col().Find(fmt.Sprintf("%s >= ?", column), pageToken)
 	}
 
-	err = query.Limit(limit).All(container)
+	for k, v := range where {
+		query.And(k, v)
+	}
+
+	err = query.OrderBy(column).Limit(limit).All(container)
 	if err != nil {
 		return "", err
 	}
