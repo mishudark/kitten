@@ -187,7 +187,7 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 	}
 
 	for k, v := range where {
-		query.And(k, v)
+		query = query.And(k, v)
 	}
 
 	err = query.OrderBy(column).Limit(limit).All(container)
