@@ -131,7 +131,7 @@ func NewPartialMutation(opt Option, opts ...Option) (*PartialMutation, error) {
 
 // Insert the provided values with the included or exluded fields, include rules has preference over
 // the excluded rules
-func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue string, mod map[string]interface{}) error {
+func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue string, extraFields map[string]interface{}) error {
 	if structPtr == nil || reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
 		return fmt.Errorf("expecting a pointer but got %T", structPtr)
 	}
@@ -152,8 +152,8 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 		return err
 	}
 
-	if mod != nil {
-		for k, v := range mod {
+	if extraFields != nil {
+		for k, v := range extraFields {
 			columns = append(columns, k)
 			values = append(values, v)
 		}
