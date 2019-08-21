@@ -205,7 +205,7 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 
 // Update the provided values with the included or exluded fields, include rules has preference over
 // the excluded rules
-func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue string) error {
+func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue string, fieldMask []string) error {
 	if structPtr == nil || reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
 		return fmt.Errorf("expecting a pointer but got %T", structPtr)
 	}
@@ -227,9 +227,39 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 	}
 
 	if len(includeFields) > 0 {
+		if fieldMask != nil {
+			mapIncludeFields := make(map[string]bool)
+			for _, v := range includeFields {
+				mapIncludeFields[v] = true
+			}
+
+			var newIncludeFields []string
+			for _, v := range fieldMask {
+				if _, ok := mapIncludeFields[v]; ok {
+					newIncludeFields = append(newIncludeFields, v)
+				}
+			}
+
+			includeFields = newIncludeFields
+		}
 		columns, values, err = p.getColumnsValuesIncluding(structPtr, includeFields)
 	} else {
-		columns, values, err = p.getColumnsValuesExcluding(structPtr, excludeFields)
+		if fieldMask == nil {
+			columns, values, err = p.getColumnsValuesExcluding(structPtr, excludeFields)
+		} else {
+			mapExludeFields := make(map[string]bool)
+			for _, v := range excludeFields {
+				mapExludeFields[v] = true
+			}
+
+			var includeFields []string
+			for _, v := range fieldMask {
+				if _, ok := mapExludeFields[v]; !ok {
+					includeFields = append(includeFields, v)
+				}
+			}
+			columns, values, err = p.getColumnsValuesIncluding(structPtr, includeFields)
+		}
 	}
 
 	if err != nil {
