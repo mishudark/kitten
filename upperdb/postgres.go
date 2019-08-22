@@ -226,8 +226,10 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 		excludeFields = p.excludeUpdateFields
 	}
 
+	fieldMaskLen := len(fieldMask)
+
 	if len(includeFields) > 0 {
-		if fieldMask != nil {
+		if fieldMaskLen > 0 {
 			mapIncludeFields := make(map[string]bool)
 			for _, v := range includeFields {
 				mapIncludeFields[v] = true
@@ -244,7 +246,7 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 		}
 		columns, values, err = p.getColumnsValuesIncluding(structPtr, includeFields)
 	} else {
-		if fieldMask == nil {
+		if fieldMaskLen == 0 {
 			columns, values, err = p.getColumnsValuesExcluding(structPtr, excludeFields)
 		} else {
 			mapExludeFields := make(map[string]bool)
