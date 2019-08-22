@@ -169,6 +169,10 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 		return errors.E(errors.Errorf("operation insert can not be performed, zero rows affected, resource %s", whereValue), errors.NotExist)
 	}
 
+	if _, ok := p.sess.(sqlbuilder.Tx); ok {
+		return nil
+	}
+
 	return p.col().Find(whereColumn, whereValue).Limit(1).One(structPtr)
 }
 
@@ -281,6 +285,10 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 
 	if n, _ := res.RowsAffected(); n == 0 {
 		return errors.E(errors.Errorf("operation update can not be performed, not exist, resource %s", whereValue), errors.NotExist)
+	}
+
+	if _, ok := p.sess.(sqlbuilder.Tx); ok {
+		return nil
 	}
 
 	return p.col().Find(whereColumn, whereValue).Limit(1).One(structPtr)
