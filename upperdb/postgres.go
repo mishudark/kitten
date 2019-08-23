@@ -132,7 +132,7 @@ func NewPartialMutation(opt Option, opts ...Option) (*PartialMutation, error) {
 // Insert the provided values with the included or exluded fields, include rules has preference over
 // the excluded rules
 // If sess is in transaction mode, the new values won't  be readed from the database
-func (p *PartialMutation) Insert(sess sqlbuilder.Database, structPtr interface{}, whereColumn, whereValue string, extraFields map[string]interface{}) error {
+func (p *PartialMutation) Insert(sess sqlbuilder.SQLBuilder, structPtr interface{}, whereColumn, whereValue string, extraFields map[string]interface{}) error {
 	if structPtr == nil || reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
 		return fmt.Errorf("expecting a pointer but got %T", structPtr)
 	}
@@ -211,7 +211,7 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 // Update the provided values with the included or exluded fields, include rules has preference over
 // the excluded rules
 // If sess is in transaction mode, the new values won't  be readed from the database
-func (p *PartialMutation) Update(sess sqlbuilder.Database, structPtr interface{}, whereColumn, whereValue string, fieldMask []string) error {
+func (p *PartialMutation) Update(sess sqlbuilder.SQLBuilder, structPtr interface{}, whereColumn, whereValue string, fieldMask []string) error {
 	if structPtr == nil || reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
 		return fmt.Errorf("expecting a pointer but got %T", structPtr)
 	}
