@@ -131,7 +131,8 @@ func NewPartialMutation(opt Option, opts ...Option) (*PartialMutation, error) {
 
 // Insert the provided values with the included or exluded fields, include rules has preference over
 // the excluded rules
-func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue string, extraFields map[string]interface{}) error {
+// If sess is in transaction mode, the new values won't  be readed from the database
+func (p *PartialMutation) Insert(sess sqlbuilder.Database, structPtr interface{}, whereColumn, whereValue string, extraFields map[string]interface{}) error {
 	if structPtr == nil || reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
 		return fmt.Errorf("expecting a pointer but got %T", structPtr)
 	}
@@ -159,7 +160,7 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 		}
 	}
 
-	query := p.sess.InsertInto(p.table).Columns(columns...).Values(values...)
+	query := sess.InsertInto(p.table).Columns(columns...).Values(values...)
 	res, err := query.Exec()
 	if err != nil {
 		return err
@@ -169,7 +170,7 @@ func (p *PartialMutation) Insert(structPtr interface{}, whereColumn, whereValue 
 		return errors.E(errors.Errorf("operation insert can not be performed, zero rows affected, resource %s", whereValue), errors.NotExist)
 	}
 
-	if _, ok := p.sess.(sqlbuilder.Tx); ok {
+	if _, ok := sess.(sqlbuilder.Tx); ok {
 		return nil
 	}
 
@@ -209,7 +210,8 @@ func (p *PartialMutation) List(container interface{}, column, pageToken string, 
 
 // Update the provided values with the included or exluded fields, include rules has preference over
 // the excluded rules
-func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue string, fieldMask []string) error {
+// If sess is in transaction mode, the new values won't  be readed from the database
+func (p *PartialMutation) Update(sess sqlbuilder.Database, structPtr interface{}, whereColumn, whereValue string, fieldMask []string) error {
 	if structPtr == nil || reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
 		return fmt.Errorf("expecting a pointer but got %T", structPtr)
 	}
@@ -277,7 +279,7 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 		mapValues[columns[i]] = values[i]
 	}
 
-	query := p.sess.Update(p.table).Set(mapValues).Where(whereColumn, whereValue)
+	query := sess.Update(p.table).Set(mapValues).Where(whereColumn, whereValue)
 	res, err := query.Exec()
 	if err != nil {
 		return err
@@ -287,7 +289,7 @@ func (p *PartialMutation) Update(structPtr interface{}, whereColumn, whereValue 
 		return errors.E(errors.Errorf("operation update can not be performed, not exist, resource %s", whereValue), errors.NotExist)
 	}
 
-	if _, ok := p.sess.(sqlbuilder.Tx); ok {
+	if _, ok := sess.(sqlbuilder.Tx); ok {
 		return nil
 	}
 
