@@ -160,6 +160,16 @@ func (p *PartialMutation) Insert(sess sqlbuilder.SQLBuilder, structPtr interface
 		}
 	}
 
+	lenColumns := len(columns)
+	lenValues := len(values)
+	if lenColumns == 0 || lenValues == 0 {
+		return errors.New("query with zero columns and values")
+	}
+
+	if lenColumns != lenValues {
+		return errors.New("columns and values length missmatch")
+	}
+
 	query := sess.InsertInto(p.table).Columns(columns...).Values(values...)
 	res, err := query.Exec()
 	if err != nil {
@@ -277,6 +287,16 @@ func (p *PartialMutation) Update(sess sqlbuilder.SQLBuilder, structPtr interface
 	mapValues := make(map[string]interface{})
 	for i := range columns {
 		mapValues[columns[i]] = values[i]
+	}
+
+	lenColumns := len(columns)
+	lenValues := len(values)
+	if lenColumns == 0 || lenValues == 0 {
+		return errors.New("query with zero columns and values")
+	}
+
+	if lenColumns != lenValues {
+		return errors.New("columns and values length missmatch")
 	}
 
 	query := sess.Update(p.table).Set(mapValues).Where(whereColumn, whereValue)
